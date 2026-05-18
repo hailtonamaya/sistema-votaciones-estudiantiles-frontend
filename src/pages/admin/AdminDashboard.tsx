@@ -13,8 +13,6 @@ import {
   TrendingUp,
 } from "lucide-react"
 
-// Federal Blue #06065C | Cobalt Blue #0F49B6 | Pacific Cyan #03AED2 | Vivid Sky Blue #47C8F0
-
 const CARRERAS = [
   "Ingeniería en Sistemas",
   "Administración de Empresas",
@@ -25,8 +23,6 @@ const CARRERAS = [
 ]
 
 const MOCK_HAS_ACTIVE_ELECTION = false
-
-// ── SVG charts ─────────────────────────────────────────────
 
 function LineChart() {
   const pts: [number, number][] = [
@@ -129,8 +125,6 @@ function ChartCard({ title, subtitle, icon, yLabels, xLabels, chart }: ChartCard
   )
 }
 
-// ── Page ───────────────────────────────────────────────────
-
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [selectedCarrera, setSelectedCarrera] = useState("")
@@ -138,7 +132,6 @@ export default function AdminDashboard() {
   const [accionesOpen, setActionsOpen] = useState(false)
   const hasActiveElection = MOCK_HAS_ACTIVE_ELECTION
 
-  // Tabs defined inside render to avoid module-level JSX
   const tabs = [
     { id: "dashboard", label: "Dashboard General", icon: <LayoutDashboard size={15} /> },
     { id: "ranking", label: "Ranking de Planillas", icon: <ListOrdered size={15} /> },
@@ -147,7 +140,6 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      {/* Title */}
       <div className="mb-5">
         <h1 className="text-2xl font-bold" style={{ color: "#06065C" }}>
           Dashboard General - Elecciones 2026
@@ -157,7 +149,6 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Toolbar */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         {hasActiveElection && (
           <div className="flex items-center gap-2 rounded-full border border-green-400 px-4 py-1.5">
@@ -167,7 +158,6 @@ export default function AdminDashboard() {
         )}
 
         <div className="ml-auto flex flex-wrap items-center gap-3">
-          {/* Carrera dropdown */}
           <div className="relative">
             <button
               onClick={() => { setCarreraOpen((p) => !p); setActionsOpen(false) }}
@@ -190,7 +180,6 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          {/* Simular */}
           <button
             disabled={!hasActiveElection}
             className="rounded-lg px-5 py-2 text-sm font-semibold text-white transition"
@@ -199,7 +188,6 @@ export default function AdminDashboard() {
             Simular
           </button>
 
-          {/* Acciones */}
           <div className="relative">
             <button
               onClick={() => { setActionsOpen((p) => !p); setCarreraOpen(false) }}
@@ -217,7 +205,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="mb-6 flex w-full overflow-x-auto pb-1 sm:w-fit sm:pb-0">
         <div className="flex items-center gap-2 rounded-xl bg-white p-1.5 shadow-sm whitespace-nowrap">
           {tabs.map((tab) => (
@@ -238,7 +225,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Tab content */}
       {activeTab === "dashboard" && (
         !hasActiveElection ? (
           <div className="flex min-h-[360px] items-center justify-center rounded-2xl bg-white shadow-sm">

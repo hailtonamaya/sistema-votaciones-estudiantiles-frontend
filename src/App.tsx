@@ -23,14 +23,11 @@ export default function App() {
       <AuthProvider>
         <VotingProvider>
           <Routes>
-            {/* Redirige raíz a login */}
             <Route path="/" element={<Navigate to="/login" replace />} />
 
-            {/* Autenticación (rutas públicas) */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/login/otp" element={<OTPPage />} />
 
-            {/* ── Rutas del Administrador ── */}
             <Route
               path="/admin/dashboard"
               element={
@@ -40,7 +37,6 @@ export default function App() {
               }
             />
 
-            {/* Rutas de Inicio */}
             <Route
               path="/admin/archivados"
               element={
@@ -50,7 +46,6 @@ export default function App() {
               }
             />
 
-            {/* Rutas de Elecciones */}
             {[
               "detalles",
               "asociaciones",
@@ -72,7 +67,6 @@ export default function App() {
               />
             ))}
 
-            {/* Rutas de Configuración */}
             {[
               { slug: "perfil", title: "Mi Perfil" },
               { slug: "usuarios", title: "Gestión de Usuarios" },
@@ -91,7 +85,6 @@ export default function App() {
               />
             ))}
 
-            {/* Ayuda */}
             <Route
               path="/admin/ayuda"
               element={
@@ -101,7 +94,6 @@ export default function App() {
               }
             />
 
-            {/* ── Rutas del Observador ── */}
             <Route
               path="/observer/dashboard"
               element={
@@ -111,7 +103,6 @@ export default function App() {
               }
             />
 
-            {/* ── Rutas del Estudiante ── */}
             <Route
               path="/student/votar"
               element={
@@ -145,7 +136,6 @@ export default function App() {
               }
             />
 
-            {/* Fallback */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
           <ChatWidget />

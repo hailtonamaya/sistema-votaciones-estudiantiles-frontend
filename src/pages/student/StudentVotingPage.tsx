@@ -18,19 +18,16 @@ export default function StudentVotingPage() {
 
   function handleSelect(association: Association | "blank") {
     selectAssociation(association)
-    // Blank vote skips the detail page — goes straight to confirmation
     navigate(association === "blank" ? "/student/confirmar" : "/student/detalle")
   }
 
   return (
     <div className="min-h-screen bg-[#EDF0F5]">
-      {/* Top bar */}
       <div className="flex items-center justify-end px-6 py-4">
         <VotingTimer startTime={voteStartTime} />
       </div>
 
       <div className="mx-auto max-w-5xl px-6 pb-12">
-        {/* Breadcrumb */}
         <p className="mb-2 text-sm font-bold text-[#1B2770]">
           {election.title} / {election.careerName}
         </p>
@@ -38,7 +35,6 @@ export default function StudentVotingPage() {
           Elige la asociación por la que quieres votar.
         </p>
 
-        {/* Association grid */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {election.associations.map((assoc) => (
             <AssociationCard
