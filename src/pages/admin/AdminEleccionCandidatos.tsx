@@ -112,9 +112,10 @@ export default function AdminEleccionCandidatos() {
 
   return (
     <AdminLayout>
-      <h1 className="mb-6 text-xl font-bold" style={{ color: BRAND }}>
-        Elecciones &gt; Candidatos
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold" style={{ color: BRAND }}>Candidatos</h1>
+        <p className="mt-0.5 text-sm text-gray-500">Agrega los candidatos de cada asociación.</p>
+      </div>
 
       {/* Election selector */}
       <div className="mb-5 rounded-2xl bg-white p-4 shadow-sm">
@@ -134,9 +135,7 @@ export default function AdminEleccionCandidatos() {
             >
               <option value="">Selecciona una elección</option>
               {elections.map((e) => (
-                <option key={e.election_id} value={e.election_id}>
-                  {e.title}
-                </option>
+                <option key={e.election_id} value={e.election_id}>{e.title}</option>
               ))}
             </select>
           </div>
@@ -148,9 +147,7 @@ export default function AdminEleccionCandidatos() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
             <Users size={30} style={{ color: ACCENT }} />
           </div>
-          <p className="mb-2 text-lg font-bold" style={{ color: BRAND }}>
-            Selecciona una elección
-          </p>
+          <p className="mb-2 text-lg font-bold" style={{ color: BRAND }}>Selecciona una elección</p>
           <p className="max-w-sm text-sm text-gray-500">
             Elige una elección en el selector de arriba para ver y gestionar sus candidatos.
           </p>
@@ -179,8 +176,8 @@ export default function AdminEleccionCandidatos() {
                 {assoc.logo_url ? (
                   <img src={assoc.logo_url} alt={assoc.name} className="h-10 w-10 rounded-lg object-cover border border-gray-100" />
                 ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                    <Users size={18} style={{ color: ACCENT }} />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-300">
+                    <Users size={18} />
                   </div>
                 )}
                 <div className="flex-1">
@@ -210,34 +207,34 @@ export default function AdminEleccionCandidatos() {
                       placeholder="Nombre completo *"
                       value={memberForm.full_name}
                       onChange={(e) => setMemberForm((p) => ({ ...p, full_name: e.target.value }))}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
                     />
                     <input
                       type="text"
                       placeholder="Cargo / Rol"
                       value={memberForm.role}
                       onChange={(e) => setMemberForm((p) => ({ ...p, role: e.target.value }))}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
                     />
                     <input
                       type="url"
                       placeholder="URL de foto (opcional)"
                       value={memberForm.photo_url}
                       onChange={(e) => setMemberForm((p) => ({ ...p, photo_url: e.target.value }))}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-400"
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-400"
                     />
                   </div>
                   <div className="mt-3 flex justify-end gap-2">
                     <button
                       onClick={() => setActiveAssoc(null)}
-                      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+                      className="flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                     >
                       Cancelar
                     </button>
                     <button
                       onClick={() => handleAddMember(assoc.association_id)}
                       disabled={saving}
-                      className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                      className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
                       style={{ backgroundColor: BRAND }}
                     >
                       {saving && <Loader2 size={13} className="animate-spin" />}

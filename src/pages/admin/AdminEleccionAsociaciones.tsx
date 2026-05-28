@@ -120,9 +120,10 @@ export default function AdminEleccionAsociaciones() {
 
   return (
     <AdminLayout>
-      <h1 className="mb-6 text-xl font-bold" style={{ color: BRAND }}>
-        Elecciones &gt; Asociaciones
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold" style={{ color: BRAND }}>Crear Asociaciones</h1>
+        <p className="mt-0.5 text-sm text-gray-500">Registra las asociaciones que participarán en la elección.</p>
+      </div>
 
       {/* Election selector */}
       <div className="mb-5 rounded-2xl bg-white p-4 shadow-sm">
@@ -142,9 +143,7 @@ export default function AdminEleccionAsociaciones() {
             >
               <option value="">Selecciona una elección</option>
               {elections.map((e) => (
-                <option key={e.election_id} value={e.election_id}>
-                  {e.title}
-                </option>
+                <option key={e.election_id} value={e.election_id}>{e.title}</option>
               ))}
             </select>
           </div>
@@ -156,18 +155,16 @@ export default function AdminEleccionAsociaciones() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
             <Users size={30} style={{ color: ACCENT }} />
           </div>
-          <p className="mb-2 text-lg font-bold" style={{ color: BRAND }}>
-            Selecciona una elección
-          </p>
+          <p className="mb-2 text-lg font-bold" style={{ color: BRAND }}>Selecciona una elección</p>
           <p className="max-w-sm text-sm text-gray-500">
             Elige una elección en el selector de arriba para ver y gestionar sus asociaciones.
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <>
           {/* Toolbar */}
           <div className="mb-5 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
               <Search size={15} className="text-gray-400" />
               <input
                 type="text"
@@ -208,18 +205,15 @@ export default function AdminEleccionAsociaciones() {
             </button>
           </div>
 
-          {/* Add form */}
+          {/* Add form panel */}
           {showForm && (
-            <div className="mb-6 rounded-xl border border-gray-100 bg-gray-50 p-6">
+            <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-semibold" style={{ color: BRAND }}>Agregar Asociación</h3>
-                <button onClick={() => setShowForm(false)}>
-                  <X size={18} className="text-gray-400 hover:text-gray-600" />
-                </button>
+                <button onClick={() => setShowForm(false)}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
               </div>
               {error && <ErrorBanner message={error} />}
 
-              {/* Image upload */}
               <div className="mb-4">
                 <p className="mb-1.5 text-sm font-semibold" style={{ color: BRAND }}>Portada de la Asociación</p>
                 <div
@@ -249,9 +243,7 @@ export default function AdminEleccionAsociaciones() {
                 {form.logo_url && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={form.logo_url} alt="preview" className="h-16 w-16 rounded-lg object-cover border border-gray-200" />
-                    <button onClick={() => setForm((p) => ({ ...p, logo_url: "" }))} className="text-xs text-red-500 hover:underline">
-                      Quitar imagen
-                    </button>
+                    <button onClick={() => setForm((p) => ({ ...p, logo_url: "" }))} className="text-xs text-red-500 hover:underline">Quitar imagen</button>
                   </div>
                 )}
               </div>
@@ -264,7 +256,7 @@ export default function AdminEleccionAsociaciones() {
                   <select
                     value={form.career_id}
                     onChange={(e) => setForm((p) => ({ ...p, career_id: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
                   >
                     <option value="">Selecciona una carrera</option>
                     {careers.map((c) => (
@@ -299,7 +291,7 @@ export default function AdminEleccionAsociaciones() {
               <div className="mt-4 flex justify-end gap-3">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                  className="flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -309,7 +301,7 @@ export default function AdminEleccionAsociaciones() {
                   className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
                   style={{ backgroundColor: BRAND }}
                 >
-                  {saving && <Loader2 size={14} className="animate-spin" />}
+                  {saving && <Loader2 size={15} className="animate-spin" />}
                   <Save size={15} />
                   Guardar Cambios
                 </button>
@@ -317,13 +309,13 @@ export default function AdminEleccionAsociaciones() {
             </div>
           )}
 
-          {/* Content */}
+          {/* List */}
           {loading ? (
             <div className="flex justify-center py-16">
               <Loader2 size={24} className="animate-spin text-gray-400" />
             </div>
           ) : filtered.length === 0 && !showForm ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-20 px-8 shadow-sm text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
                 <Users size={30} style={{ color: ACCENT }} />
               </div>
@@ -343,14 +335,14 @@ export default function AdminEleccionAsociaciones() {
           ) : (
             <div className={`grid gap-4 ${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
               {filtered.map((assoc) => {
-                const careerName = assoc.election_career?.career?.name
+                const careerName = (assoc as { election_career?: { career?: { name: string } | null } | null }).election_career?.career?.name
                 return (
-                  <div key={assoc.association_id} className="flex items-center gap-4 rounded-xl border border-gray-100 p-4 transition hover:bg-gray-50">
+                  <div key={assoc.association_id} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
                     {assoc.logo_url ? (
                       <img src={assoc.logo_url} alt={assoc.name} className="h-14 w-14 flex-shrink-0 rounded-lg object-cover border border-gray-100" />
                     ) : (
-                      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                        <Users size={24} style={{ color: ACCENT }} />
+                      <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-300">
+                        <Users size={24} />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
@@ -368,7 +360,7 @@ export default function AdminEleccionAsociaciones() {
               })}
             </div>
           )}
-        </div>
+        </>
       )}
     </AdminLayout>
   )
