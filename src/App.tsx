@@ -21,6 +21,7 @@ import AdminEleccionWizard from "@/pages/admin/AdminEleccionWizard"
 import AdminEleccionAsociaciones from "@/pages/admin/AdminEleccionAsociaciones"
 import AdminEleccionCandidatos from "@/pages/admin/AdminEleccionCandidatos"
 import AdminEleccionVotantes from "@/pages/admin/AdminEleccionVotantes"
+import AdminEleccionRevision from "@/pages/admin/AdminEleccionRevision"
 import AdminGestionUsuarios from "@/pages/admin/AdminGestionUsuarios"
 import AdminBancoCampus from "@/pages/admin/AdminBancoCampus"
 import AdminBancoCarreras from "@/pages/admin/AdminBancoCarreras"
@@ -96,19 +97,22 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            {["revision", "resultados"].map((slug) => (
-              <Route
-                key={slug}
-                path={`/admin/elecciones/${slug}`}
-                element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <AdminPlaceholder
-                      title={slug.charAt(0).toUpperCase() + slug.slice(1)}
-                    />
-                  </ProtectedRoute>
-                }
-              />
-            ))}
+            <Route
+              path="/admin/elecciones/revision"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <AdminEleccionRevision />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/elecciones/resultados"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <AdminPlaceholder title="Resultados" />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/admin/configuracion/usuarios"

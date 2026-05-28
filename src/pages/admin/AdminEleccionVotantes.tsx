@@ -125,9 +125,10 @@ export default function AdminEleccionVotantes() {
 
   return (
     <AdminLayout>
-      <h1 className="mb-6 text-xl font-bold" style={{ color: BRAND }}>
-        Elecciones &gt; Votantes
-      </h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold" style={{ color: BRAND }}>Crear Votantes</h1>
+        <p className="mt-0.5 text-sm text-gray-500">Registra los estudiantes habilitados para votar.</p>
+      </div>
 
       {/* Election selector */}
       <div className="mb-5 rounded-2xl bg-white p-4 shadow-sm">
@@ -147,9 +148,7 @@ export default function AdminEleccionVotantes() {
             >
               <option value="">Selecciona una elección</option>
               {elections.map((e) => (
-                <option key={e.election_id} value={e.election_id}>
-                  {e.title}
-                </option>
+                <option key={e.election_id} value={e.election_id}>{e.title}</option>
               ))}
             </select>
           </div>
@@ -161,18 +160,16 @@ export default function AdminEleccionVotantes() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
             <Users size={30} style={{ color: ACCENT }} />
           </div>
-          <p className="mb-2 text-lg font-bold" style={{ color: BRAND }}>
-            Selecciona una elección
-          </p>
+          <p className="mb-2 text-lg font-bold" style={{ color: BRAND }}>Selecciona una elección</p>
           <p className="max-w-sm text-sm text-gray-500">
             Elige una elección en el selector de arriba para ver y gestionar sus votantes.
           </p>
         </div>
       ) : (
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
+        <>
           {/* Toolbar */}
           <div className="mb-5 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
               <Search size={15} className="text-gray-400" />
               <input
                 type="text"
@@ -213,14 +210,12 @@ export default function AdminEleccionVotantes() {
             </button>
           </div>
 
-          {/* Add form */}
+          {/* Add form panel */}
           {showForm && (
-            <div className="mb-6 rounded-xl border border-gray-100 bg-gray-50 p-6">
+            <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="font-semibold" style={{ color: BRAND }}>Agregar Votante</h3>
-                <button onClick={() => setShowForm(false)}>
-                  <X size={18} className="text-gray-400 hover:text-gray-600" />
-                </button>
+                <button onClick={() => setShowForm(false)}><X size={18} className="text-gray-400 hover:text-gray-600" /></button>
               </div>
               {error && <ErrorBanner message={error} />}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -233,7 +228,7 @@ export default function AdminEleccionVotantes() {
                     value={form.full_name}
                     onChange={(e) => setForm((p) => ({ ...p, full_name: e.target.value }))}
                     placeholder="Nombre completo"
-                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
@@ -245,7 +240,7 @@ export default function AdminEleccionVotantes() {
                     value={form.institutional_id}
                     onChange={(e) => setForm((p) => ({ ...p, institutional_id: e.target.value }))}
                     placeholder="Ej. 20211001234"
-                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
@@ -257,7 +252,7 @@ export default function AdminEleccionVotantes() {
                     value={form.email}
                     onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                     placeholder="estudiante@unitec.edu.hn"
-                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -267,7 +262,7 @@ export default function AdminEleccionVotantes() {
                   <select
                     value={form.career_id}
                     onChange={(e) => setForm((p) => ({ ...p, career_id: e.target.value }))}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-400"
+                    className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400"
                   >
                     <option value="">Selecciona una carrera</option>
                     {careers.map((c) => (
@@ -279,7 +274,7 @@ export default function AdminEleccionVotantes() {
               <div className="mt-4 flex justify-end gap-3">
                 <button
                   onClick={() => setShowForm(false)}
-                  className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                  className="flex items-center gap-2 rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
@@ -289,7 +284,7 @@ export default function AdminEleccionVotantes() {
                   className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
                   style={{ backgroundColor: BRAND }}
                 >
-                  {saving && <Loader2 size={14} className="animate-spin" />}
+                  {saving && <Loader2 size={15} className="animate-spin" />}
                   <Save size={15} />
                   Guardar Cambios
                 </button>
@@ -297,13 +292,13 @@ export default function AdminEleccionVotantes() {
             </div>
           )}
 
-          {/* Content */}
+          {/* Voters table */}
           {loading ? (
             <div className="flex justify-center py-16">
               <Loader2 size={24} className="animate-spin text-gray-400" />
             </div>
           ) : filtered.length === 0 && !showForm ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="flex flex-col items-center justify-center rounded-2xl bg-white py-20 px-8 shadow-sm text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
                 <Users size={30} style={{ color: ACCENT }} />
               </div>
@@ -321,21 +316,21 @@ export default function AdminEleccionVotantes() {
               </button>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-gray-100">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
               <table className="w-full text-sm">
-                <thead style={{ backgroundColor: "#DBEAFE" }}>
-                  <tr>
-                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase" style={{ color: BRAND }}>Nombre</th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase" style={{ color: BRAND }}>N° Cuenta</th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase" style={{ color: BRAND }}>Correo</th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase" style={{ color: BRAND }}>Carrera</th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase" style={{ color: BRAND }}>Votó</th>
+                <thead>
+                  <tr className="border-b border-gray-100 text-left">
+                    <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-400">Nombre</th>
+                    <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-400">N° Cuenta</th>
+                    <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-400">Correo</th>
+                    <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-400">Carrera</th>
+                    <th className="px-5 py-3 text-xs font-semibold uppercase text-gray-400">Votó</th>
                     <th className="px-5 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 bg-white">
+                <tbody className="divide-y divide-gray-50">
                   {filtered.map((v) => (
-                    <tr key={v.election_voter_id} className="transition hover:bg-gray-50">
+                    <tr key={v.election_voter_id} className="hover:bg-gray-50 transition">
                       <td className="px-5 py-3 font-medium text-gray-800">{getVoterName(v)}</td>
                       <td className="px-5 py-3 text-gray-500">{getVoterAccount(v)}</td>
                       <td className="px-5 py-3 text-gray-500">{getVoterEmail(v)}</td>
@@ -356,7 +351,7 @@ export default function AdminEleccionVotantes() {
               </table>
             </div>
           )}
-        </div>
+        </>
       )}
     </AdminLayout>
   )
