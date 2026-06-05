@@ -12,17 +12,30 @@ import { ApiError } from "@/lib/api"
 import { useAuth } from "@/context/AuthContext"
 import { sendChatMessage, type ChatMessage } from "@/services/ai.service"
 
-const WELCOME: ChatMessage = {
+const WELCOME_STUDENT: ChatMessage = {
   role: "assistant",
   content:
     "¡Hola! Soy el asistente de Elecciones UNITEC. Puedo explicarte cómo funciona el proceso de votación, los códigos OTP, los estados de una elección y resolver dudas frecuentes. ¿En qué te ayudo?",
 }
 
-const SUGGESTIONS = [
+const WELCOME_ADMIN: ChatMessage = {
+  role: "assistant",
+  content:
+    "¡Hola! Soy el asistente administrativo de Elecciones UNITEC. Puedo ayudarte con la creación y gestión de elecciones, asociaciones, votantes y configuración del sistema. ¿En qué te ayudo?",
+}
+
+const SUGGESTIONS_STUDENT = [
   "¿Cómo voto?",
   "No me llegó el código OTP",
   "¿Puedo cambiar mi voto?",
   "¿El voto es secreto?",
+]
+
+const SUGGESTIONS_ADMIN = [
+  "¿Cómo crear una elección?",
+  "¿Cómo importar votantes?",
+  "¿Cómo activar una elección?",
+  "¿Qué estados tiene una elección?",
 ]
 
 function renderInline(text: string) {
@@ -65,8 +78,12 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 
 export function ChatWidget() {
   const { token, user } = useAuth()
+  const isAdmin = user?.role === "admin"
+  const welcome = isAdmin ? WELCOME_ADMIN : WELCOME_STUDENT
+  const suggestions = isAdmin ? SUGGESTIONS_ADMIN : SUGGESTIONS_STUDENT
+
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME])
+  const [messages, setMessages] = useState<ChatMessage[]>([welcome])
   const [input, setInput] = useState("")
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -85,7 +102,7 @@ export function ChatWidget() {
     }
   }, [open, messages.length, sending])
 
-  if (!token || user?.role !== "student") return null
+  if (!token || !["student", "admin"].includes(user?.role ?? "")) return null
 
   async function send(content: string) {
     const trimmed = content.trim()
@@ -160,7 +177,7 @@ export function ChatWidget() {
                 <p className="text-sm font-semibold">Asistente UNITEC</p>
                 <p className="flex items-center gap-1 text-[11px] text-white/70">
                   <Sparkle className="h-2.5 w-2.5" />
-                  IA · Proceso de votación
+                  {isAdmin ? "IA · Panel administrativo" : "IA · Proceso de votación"}
                 </p>
               </div>
             </div>
@@ -197,7 +214,7 @@ export function ChatWidget() {
                   Preguntas frecuentes
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {SUGGESTIONS.map((s) => (
+                  {suggestions.map((s) => (
                     <button
                       key={s}
                       type="button"
