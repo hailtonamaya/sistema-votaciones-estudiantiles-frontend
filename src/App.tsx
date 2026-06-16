@@ -16,6 +16,7 @@ import StudentConfirmPage from "@/pages/student/StudentConfirmPage"
 import StudentSuccessPage from "@/pages/student/StudentSuccessPage"
 
 import AdminPlaceholder from "@/pages/admin/AdminPlaceholder"
+import AdminResultados from "@/pages/admin/AdminResultados"
 import AdminEleccionesDetalles from "@/pages/admin/AdminEleccionesDetalles"
 import AdminEleccionWizard from "@/pages/admin/AdminEleccionWizard"
 import AdminEleccionAsociaciones from "@/pages/admin/AdminEleccionAsociaciones"
@@ -110,7 +111,7 @@ export default function App() {
               path="/admin/elecciones/resultados"
               element={
                 <ProtectedRoute roles={["admin"]}>
-                  <AdminPlaceholder title="Resultados" />
+                  <AdminResultados />
                 </ProtectedRoute>
               }
             />
