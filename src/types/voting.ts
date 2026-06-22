@@ -1,11 +1,3 @@
-export interface Student {
-  id: string
-  email: string
-  name: string
-  careerId: string
-  careerName: string
-}
-
 export interface Candidate {
   id: string
   name: string

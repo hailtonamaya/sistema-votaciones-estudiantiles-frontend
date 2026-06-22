@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { VotingTimer } from "@/components/student/VotingTimer"
 import { UnitecLogo } from "@/components/UnitecLogo"
 import { useVoting } from "@/context/VotingContext"
 import { useAuth } from "@/context/AuthContext"
 import { castVote } from "@/services/voting.service"
+import { BRAND } from "@/lib/brand"
 import type { Association } from "@/types/voting"
 
 export default function StudentConfirmPage() {
@@ -19,10 +20,13 @@ export default function StudentConfirmPage() {
     setVoteResult,
   } = useVoting()
 
-  if (!election || !selectedAssociation || !token || !voteStartTime) {
-    navigate("/login")
-    return null
-  }
+  const isInvalid = !election || !selectedAssociation || !token || !voteStartTime
+
+  useEffect(() => {
+    if (isInvalid) navigate("/login", { replace: true })
+  }, [isInvalid, navigate])
+
+  if (isInvalid) return null
 
   const isBlank = selectedAssociation === "blank"
   const assocName = isBlank ? "Voto Blanco" : selectedAssociation.name
@@ -59,13 +63,16 @@ export default function StudentConfirmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#EDF0F5]">
+    <main className="min-h-screen bg-bg-light">
       <div className="flex items-center justify-between px-6 py-4">
         <button
           onClick={() => navigate("/student/votar")}
-          className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-[#1B2770] transition hover:bg-gray-50"
+          className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium transition hover:bg-gray-50"
+          style={{ color: BRAND }}
         >
           <svg
+            aria-hidden="true"
+            focusable="false"
             width="16"
             height="16"
             viewBox="0 0 24 24"
@@ -97,6 +104,8 @@ export default function StudentConfirmPage() {
           ) : (
             <div className="flex h-52 w-full items-center justify-center bg-slate-200 text-slate-400 sm:h-80">
               <svg
+                aria-hidden="true"
+                focusable="false"
                 width="64"
                 height="64"
                 viewBox="0 0 24 24"
@@ -114,7 +123,7 @@ export default function StudentConfirmPage() {
         </div>
 
         <div className="mt-8 text-center">
-          <h2 className="text-2xl font-bold text-[#1B2770]">
+          <h2 className="text-2xl font-bold" style={{ color: BRAND }}>
             ¿Confirmar Voto?
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-gray-600">
@@ -132,19 +141,21 @@ export default function StudentConfirmPage() {
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className="rounded-lg bg-[#1B2770] py-4 text-sm font-semibold text-white transition hover:bg-[#14205A] disabled:opacity-50"
+            className="rounded-lg py-4 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+            style={{ backgroundColor: BRAND }}
           >
             {loading ? "Registrando..." : "Sí, confirmar voto"}
           </button>
           <button
             onClick={() => navigate("/student/votar")}
             disabled={loading}
-            className="rounded-lg border border-[#1B2770] py-4 text-sm font-semibold text-[#1B2770] transition hover:bg-[#1B2770]/5 disabled:opacity-50"
+            className="rounded-lg border py-4 text-sm font-semibold transition hover:bg-brand/5 disabled:opacity-50"
+            style={{ borderColor: BRAND, color: BRAND }}
           >
             No, cambiar selección
           </button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

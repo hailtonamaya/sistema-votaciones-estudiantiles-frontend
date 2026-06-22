@@ -137,29 +137,29 @@ export interface ApiAssociation {
 
 export const listAssociations = (token: string, params: { election_id?: string; election_career_id?: string } = {}): Promise<ApiAssociation[]> => {
   const qs = new URLSearchParams()
-  if (params.election_id) qs.set('election_id', params.election_id)
-  if (params.election_career_id) qs.set('election_career_id', params.election_career_id)
-  return api<{ data: ApiAssociation[] }>(`/associations${qs.toString() ? `?${qs}` : ''}`, { token }).then((r) => r.data)
+  if (params.election_id) qs.set("election_id", params.election_id)
+  if (params.election_career_id) qs.set("election_career_id", params.election_career_id)
+  return api<{ data: ApiAssociation[] }>(`/associations${qs.toString() ? `?${qs}` : ""}`, { token }).then((r) => r.data)
 }
 
 export const createAssociation = (
   token: string,
   body: { election_id: string; career_id: string; name: string; description?: string; logo_url?: string },
 ): Promise<ApiAssociation> =>
-  api<{ data: ApiAssociation }>('/associations', { method: 'POST', token, body }).then((r) => r.data)
+  api<{ data: ApiAssociation }>("/associations", { method: "POST", token, body }).then((r) => r.data)
 
 export const deleteAssociation = (token: string, id: string): Promise<void> =>
-  api<void>(`/associations/${id}`, { method: 'DELETE', token })
+  api<void>(`/associations/${id}`, { method: "DELETE", token })
 
 export const createAssociationMember = (
   token: string,
   associationId: string,
   body: { full_name: string; role?: string; photo_url?: string },
 ): Promise<ApiAssociationMember> =>
-  api<{ data: ApiAssociationMember }>(`/associations/${associationId}/members`, { method: 'POST', token, body }).then((r) => r.data)
+  api<{ data: ApiAssociationMember }>(`/associations/${associationId}/members`, { method: "POST", token, body }).then((r) => r.data)
 
 export const deleteAssociationMember = (token: string, associationId: string, memberId: string): Promise<void> =>
-  api<void>(`/associations/${associationId}/members/${memberId}`, { method: 'DELETE', token })
+  api<void>(`/associations/${associationId}/members/${memberId}`, { method: "DELETE", token })
 
 // ─── Voters ───────────────────────────────────────────────────────────────────
 
@@ -190,22 +190,23 @@ export interface ImportVotersResult {
 export const listVoters = (token: string, electionId: string): Promise<ApiVoter[]> =>
   api<{ data: ApiVoter[] }>(`/voters?election_id=${electionId}`, { token }).then((r) => r.data)
 
+
 export const createVoter = (
   token: string,
   body: { election_id: string; career_id: string; full_name: string; institutional_id: string; email: string },
 ): Promise<ApiVoter> =>
-  api<{ data: ApiVoter }>('/voters', { method: 'POST', token, body }).then((r) => r.data)
+  api<{ data: ApiVoter }>("/voters", { method: "POST", token, body }).then((r) => r.data)
 
 export const importVoters = (
   token: string,
   electionId: string,
   rows: ImportVoterRow[],
 ): Promise<ImportVotersResult> =>
-  api<{ data: ImportVotersResult }>('/voters/import', { method: 'POST', token, body: { election_id: electionId, rows } })
+  api<{ data: ImportVotersResult }>("/voters/import", { method: "POST", token, body: { election_id: electionId, rows } })
     .then((r) => r.data)
 
 export const deleteVoter = (token: string, id: string): Promise<void> =>
-  api<void>(`/voters/${id}`, { method: 'DELETE', token })
+  api<void>(`/voters/${id}`, { method: "DELETE", token })
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 

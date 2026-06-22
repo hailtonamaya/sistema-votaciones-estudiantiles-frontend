@@ -20,8 +20,7 @@ import {
   XCircle,
 } from "lucide-react"
 
-const BRAND = "#06065C"
-const ACCENT = "#03AED2"
+import { BRAND, ACCENT } from "@/lib/brand"
 
 type RevisionStatus = "ok" | "warning" | "incomplete"
 

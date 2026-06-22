@@ -27,9 +27,7 @@ import {
   X,
 } from "lucide-react"
 import { ErrorBanner } from "@/components/ErrorBanner"
-
-const BRAND = "#06065C"
-const ACCENT = "#03AED2"
+import { BRAND, ACCENT } from "@/lib/brand"
 
 export default function AdminEleccionAsociaciones() {
   const { token } = useAuth()

@@ -5,8 +5,7 @@ import { getAdminUser, updateAdminUser } from "@/services/admin.service"
 import { CheckCircle2, Loader2, Save, Shield } from "lucide-react"
 import { ErrorBanner } from "@/components/ErrorBanner"
 
-const BRAND = "#06065C"
-const ACCENT = "#03AED2"
+import { BRAND, ACCENT } from "@/lib/brand"
 
 const ROLE_LABELS: Record<string, string> = {
   admin: "Administrador",

@@ -8,6 +8,7 @@ import {
 import { useVoting } from "@/context/VotingContext"
 import { useAuth } from "@/context/AuthContext"
 import { getStudentElection } from "@/services/voting.service"
+import { BRAND } from "@/lib/brand"
 import type { Association } from "@/types/voting"
 
 export default function StudentVotingPage() {
@@ -25,37 +26,40 @@ export default function StudentVotingPage() {
       return
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    let cancelled = false
     setLoading(true)
     getStudentElection(token)
       .then((e) => {
+        if (cancelled) return
         setElection(e)
         startVoting()
       })
       .catch((err) => {
+        if (cancelled) return
         setLoadError(
           err instanceof Error
             ? err.message
             : "No tienes ninguna elección activa habilitada para tu carrera.",
         )
       })
-      .finally(() => setLoading(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
+  }, [election, voteStartTime, token, navigate, setElection, startVoting])
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#EDF0F5]">
+      <main className="flex min-h-dvh items-center justify-center bg-bg-light">
         <p className="text-sm text-gray-500">Cargando elección...</p>
-      </div>
+      </main>
     )
   }
 
   if (loadError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#EDF0F5] px-4">
+      <main className="flex min-h-dvh flex-col items-center justify-center bg-bg-light px-4">
         <p className="text-center text-sm text-red-500">{loadError}</p>
-      </div>
+      </main>
     )
   }
 
@@ -67,13 +71,13 @@ export default function StudentVotingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#EDF0F5]">
+    <main className="min-h-dvh bg-bg-light">
       <div className="flex items-center justify-end px-6 py-4">
         <VotingTimer startTime={voteStartTime} />
       </div>
 
       <div className="mx-auto max-w-5xl px-4 pb-12 sm:px-6">
-        <p className="mb-2 text-sm font-bold text-[#1B2770]">
+        <p className="mb-2 text-sm font-bold" style={{ color: BRAND }}>
           {election.title} / {election.careerName}
         </p>
         <p className="mb-8 text-sm text-gray-600">
@@ -91,6 +95,6 @@ export default function StudentVotingPage() {
           <BlankVoteCard onClick={() => handleSelect("blank")} />
         </div>
       </div>
-    </div>
+    </main>
   )
 }

@@ -3,12 +3,14 @@ import type { Election, VotePayload, VoteResult } from "@/types/voting"
 import type { AuthUser, UserRole } from "@/context/AuthContext"
 
 interface VerifyOtpResponse {
-  token: string
-  user: {
-    user_id: string
-    email: string
-    full_name: string
-    role: string
+  data: {
+    token: string
+    user: {
+      user_id: string
+      email: string
+      full_name: string
+      role: string
+    }
   }
 }
 
@@ -46,7 +48,7 @@ interface CastBallotResponse {
 }
 
 export async function requestOTP(email: string): Promise<void> {
-  await api<{ ok: boolean; message: string }>("/auth/request-otp", {
+  await api<{ data: { message: string } }>("/auth/request-otp", {
     method: "POST",
     body: { email },
   })
@@ -56,18 +58,19 @@ export async function verifyOTP(
   email: string,
   code: string,
 ): Promise<{ token: string; user: AuthUser }> {
-  const data = await api<VerifyOtpResponse>("/auth/verify-otp", {
+  // El backend envuelve la respuesta en { data: { token, user } }
+  const res = await api<VerifyOtpResponse>("/auth/verify-otp", {
     method: "POST",
     body: { email, code },
   })
 
   return {
-    token: data.token,
+    token: res.data.token,
     user: {
-      id: data.user.user_id,
-      email: data.user.email,
-      name: data.user.full_name,
-      role: data.user.role as UserRole,
+      id: res.data.user.user_id,
+      email: res.data.user.email,
+      name: res.data.user.full_name,
+      role: res.data.user.role as UserRole,
     },
   }
 }
