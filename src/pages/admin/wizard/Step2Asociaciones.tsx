@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState } from "react"
-import { ChevronRight, ImageIcon, Loader2, Plus, Save, Trash2, Users, X } from "lucide-react"
+import { ChevronRight, ImageIcon, Loader2, Pencil, Plus, Save, Trash2, Users, X } from "lucide-react"
 import { ErrorBanner } from "@/components/ErrorBanner"
 import { EmptyState } from "@/components/EmptyState"
 import { SectionHeader } from "@/components/wizard/SectionHeader"
 import { BtnPrimary, BtnSecondary, BtnAccent } from "@/components/wizard/WizardButtons"
 import { WizardBottomBar } from "@/components/wizard/WizardBottomBar"
 import { BRAND, ACCENT } from "@/lib/brand"
+import { resolveImageUrl } from "@/lib/api"
 import {
   type ApiAssociation,
   type ApiCareer,
   createAssociation,
+  updateAssociation,
   deleteAssociation,
   listAssociations,
   listCareers,
+  uploadImage,
 } from "@/services/admin.service"
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 interface Step2Props {
   electionId: string
@@ -31,10 +36,13 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
   const [associations, setAssociations] = useState<ApiAssociation[]>([])
   const [loading, setLoading] = useState(true)
   const [activeCareerId, setActiveCareerId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({ name: "", description: "", logo_url: "" })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -43,7 +51,7 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
       listAssociations(token, { election_id: electionId }),
     ])
       .then(([c, a]) => { setCareers(c); setAssociations(a) })
-      .catch(() => {})
+      .catch((e) => setLoadError(e instanceof Error ? e.message : "Error al cargar los datos"))
       .finally(() => setLoading(false))
   }, [token, electionId])
 
@@ -59,39 +67,68 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
 
   function openForm(careerId: string) {
     setActiveCareerId(careerId)
+    setEditingId(null)
     setForm({ name: "", description: "", logo_url: "" })
     setError(null)
   }
 
-  async function handleCreate(careerId: string) {
+  function openEditForm(assoc: ApiAssociation) {
+    const careerId = assoc.election_career?.career?.career_id
+    if (!careerId) return
+    setActiveCareerId(careerId)
+    setEditingId(assoc.association_id)
+    setForm({
+      name: assoc.name,
+      description: assoc.description ?? "",
+      logo_url: assoc.logo_url ?? "",
+    })
+    setError(null)
+  }
+
+  async function handleSave(careerId: string) {
     setError(null)
     if (!form.name.trim()) { setError("El nombre de la asociación es requerido"); return }
     setSaving(true)
     try {
-      const created = await createAssociation(token, {
-        election_id: electionId,
-        career_id: careerId,
-        name: form.name.trim(),
-        description: form.description.trim() || undefined,
-        logo_url: form.logo_url || undefined,
-      })
-      // Enrich with career info so grouping works immediately without a refetch
-      const career = careers.find((c) => c.career_id === careerId)
-      const enriched: ApiAssociation = {
-        ...created,
-        election_career: {
+      if (editingId) {
+        const name = form.name.trim()
+        const description = form.description.trim() || null
+        const logo_url = form.logo_url || null
+        await updateAssociation(token, editingId, {
+          name,
+          description: description ?? undefined,
+          logo_url: logo_url ?? undefined,
+        })
+        setAssociations((prev) =>
+          prev.map((a) => (a.association_id === editingId ? { ...a, name, description, logo_url } : a)),
+        )
+      } else {
+        const created = await createAssociation(token, {
           election_id: electionId,
           career_id: careerId,
-          career: career
-            ? { career_id: career.career_id, name: career.name, code: career.code }
-            : null,
-        },
+          name: form.name.trim(),
+          description: form.description.trim() || undefined,
+          logo_url: form.logo_url || undefined,
+        })
+        // Enrich with career info so grouping works immediately without a refetch
+        const career = careers.find((c) => c.career_id === careerId)
+        const enriched: ApiAssociation = {
+          ...created,
+          election_career: {
+            election_id: electionId,
+            career_id: careerId,
+            career: career
+              ? { career_id: career.career_id, name: career.name, code: career.code }
+              : null,
+          },
+        }
+        setAssociations((prev) => [...prev, enriched])
       }
-      setAssociations((prev) => [...prev, enriched])
       setActiveCareerId(null)
+      setEditingId(null)
       setForm({ name: "", description: "", logo_url: "" })
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al crear la asociación")
+      setError(e instanceof Error ? e.message : editingId ? "Error al actualizar la planilla" : "Error al crear la asociación")
     } finally {
       setSaving(false)
     }
@@ -119,6 +156,7 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
         />
       )}
 
+      {loadError && <ErrorBanner message={loadError} />}
       {deleteError && <ErrorBanner message={deleteError} />}
 
       {loading ? (
@@ -155,9 +193,10 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                   <span className="text-xs text-gray-400">{assocs.length} asociación(es)</span>
                   {!isReadOnly && (
                     <button
-                      onClick={() =>
-                        isActive ? setActiveCareerId(null) : openForm(career.career_id)
-                      }
+                      onClick={() => {
+                        if (isActive) { setActiveCareerId(null); setEditingId(null) }
+                        else openForm(career.career_id)
+                      }}
                       className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
                       style={{ backgroundColor: isActive ? "#64748B" : BRAND }}
                     >
@@ -177,7 +216,7 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                       {form.logo_url ? (
                         <div className="flex items-center gap-3">
                           <img
-                            src={form.logo_url}
+                            src={resolveImageUrl(form.logo_url)}
                             alt="preview"
                             className="h-16 w-16 rounded-xl border border-gray-200 object-cover"
                           />
@@ -190,17 +229,21 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                         </div>
                       ) : (
                         <div
-                          onClick={() => fileRef.current?.click()}
+                          onClick={() => { if (!uploading) fileRef.current?.click() }}
                           className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-blue-200 bg-white px-4 py-3 transition hover:border-blue-400"
                         >
                           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100">
-                            <ImageIcon size={16} className="text-blue-400" />
+                            {uploading ? (
+                              <Loader2 size={16} className="animate-spin text-blue-400" />
+                            ) : (
+                              <ImageIcon size={16} className="text-blue-400" />
+                            )}
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-600">
-                              Subir logo (opcional)
+                              {uploading ? "Subiendo…" : "Subir logo (opcional)"}
                             </p>
-                            <p className="text-xs text-gray-400">PNG, JPG hasta 1MB</p>
+                            <p className="text-xs text-gray-400">PNG, JPG o WEBP hasta 5MB</p>
                           </div>
                         </div>
                       )}
@@ -209,17 +252,24 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0]
+                          e.target.value = ""
                           if (!file) return
-                          if (file.size > 1 * 1024 * 1024) {
-                            setError("La imagen no puede superar 1MB")
+                          if (file.size > MAX_UPLOAD_BYTES) {
+                            setError("La imagen no puede superar 5MB")
                             return
                           }
-                          const reader = new FileReader()
-                          reader.onload = (ev) =>
-                            setForm((p) => ({ ...p, logo_url: ev.target?.result as string }))
-                          reader.readAsDataURL(file)
+                          setError(null)
+                          setUploading(true)
+                          try {
+                            const url = await uploadImage(token, file)
+                            setForm((p) => ({ ...p, logo_url: url }))
+                          } catch (err) {
+                            setError(err instanceof Error ? err.message : "Error al subir la imagen")
+                          } finally {
+                            setUploading(false)
+                          }
                         }}
                       />
                     </div>
@@ -260,15 +310,16 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                     </div>
 
                     <div className="mt-3 flex justify-end gap-2">
-                      <BtnSecondary onClick={() => setActiveCareerId(null)}>
+                      <BtnSecondary onClick={() => { setActiveCareerId(null); setEditingId(null) }}>
                         Cancelar
                       </BtnSecondary>
                       <BtnPrimary
                         loading={saving}
-                        onClick={() => handleCreate(career.career_id)}
+                        disabled={uploading}
+                        onClick={() => handleSave(career.career_id)}
                       >
                         <Save size={14} />
-                        Guardar Asociación
+                        {editingId ? "Guardar Cambios" : "Guardar Asociación"}
                       </BtnPrimary>
                     </div>
                   </div>
@@ -288,7 +339,7 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                       >
                         {assoc.logo_url ? (
                           <img
-                            src={assoc.logo_url}
+                            src={resolveImageUrl(assoc.logo_url)}
                             alt={assoc.name}
                             className="h-10 w-10 flex-shrink-0 rounded-lg border border-gray-100 object-cover"
                           />
@@ -309,13 +360,22 @@ export function Step2({ electionId, token, organizationId, isReadOnly = false, h
                           </p>
                         </div>
                         {!isReadOnly && (
-                          <button
-                            onClick={() => handleDelete(assoc.association_id)}
-                            aria-label={`Eliminar planilla ${assoc.name}`}
-                            className="text-red-400 transition hover:text-red-600"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => openEditForm(assoc)}
+                              aria-label={`Editar planilla ${assoc.name}`}
+                              className="text-gray-400 transition hover:text-blue-600"
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(assoc.association_id)}
+                              aria-label={`Eliminar planilla ${assoc.name}`}
+                              className="text-red-400 transition hover:text-red-600"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         )}
                       </div>
                     ))}

@@ -1,4 +1,4 @@
-import { api } from "@/lib/api"
+import { api, apiUpload } from "@/lib/api"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -43,6 +43,11 @@ export interface ApiUser {
   is_active: boolean
   created_at: string
 }
+
+// ─── Uploads ──────────────────────────────────────────────────────────────────
+
+export const uploadImage = (token: string, file: File): Promise<string> =>
+  apiUpload<{ data: { url: string } }>("/uploads/image", file, token).then((r) => r.data.url)
 
 // ─── Elections ────────────────────────────────────────────────────────────────
 
@@ -151,6 +156,13 @@ export const createAssociation = (
 ): Promise<ApiAssociation> =>
   api<{ data: ApiAssociation }>("/associations", { method: "POST", token, body }).then((r) => r.data)
 
+export const updateAssociation = (
+  token: string,
+  id: string,
+  body: Partial<{ name: string; description: string; logo_url: string }>,
+): Promise<ApiAssociation> =>
+  api<{ data: ApiAssociation }>(`/associations/${id}`, { method: "PATCH", token, body }).then((r) => r.data)
+
 export const deleteAssociation = (token: string, id: string): Promise<void> =>
   api<void>(`/associations/${id}`, { method: "DELETE", token })
 
@@ -160,6 +172,14 @@ export const createAssociationMember = (
   body: { full_name: string; role?: string; photo_url?: string },
 ): Promise<ApiAssociationMember> =>
   api<{ data: ApiAssociationMember }>(`/associations/${associationId}/members`, { method: "POST", token, body }).then((r) => r.data)
+
+export const updateAssociationMember = (
+  token: string,
+  associationId: string,
+  memberId: string,
+  body: Partial<{ full_name: string; role: string; photo_url: string }>,
+): Promise<ApiAssociationMember> =>
+  api<{ data: ApiAssociationMember }>(`/associations/${associationId}/members/${memberId}`, { method: "PATCH", token, body }).then((r) => r.data)
 
 export const deleteAssociationMember = (token: string, associationId: string, memberId: string): Promise<void> =>
   api<void>(`/associations/${associationId}/members/${memberId}`, { method: "DELETE", token })
