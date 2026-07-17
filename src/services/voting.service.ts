@@ -124,7 +124,7 @@ export async function castVote(
   votingTimeSeconds: number,
 ): Promise<VoteResult> {
   const isBlank = payload.associationId === null
-  await api<CastBallotResponse>("/ballots", {
+  const res = await api<CastBallotResponse>("/ballots", {
     method: "POST",
     token,
     body: {
@@ -135,7 +135,7 @@ export async function castVote(
     },
   })
 
-  return { electionTitle, careerName, associationName, votingTimeSeconds }
+  return { electionTitle, careerName, associationName, votingTimeSeconds, ballotHash: res.data.ballot_hash }
 }
 
 // Backward-compatible aliases

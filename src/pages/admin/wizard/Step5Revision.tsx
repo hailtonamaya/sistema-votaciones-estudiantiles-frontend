@@ -11,6 +11,7 @@ import { mapApiAssociation } from "@/lib/mappers"
 import { BRAND } from "@/lib/brand"
 import type { Association } from "@/types/voting"
 import {
+  type ApiAssociation,
   type ApiCareer,
   type ApiElection,
   listAssociations,
@@ -39,6 +40,8 @@ export function Step5({ election, electionId, token, hideHeader = false, onBack,
   const [assocCount, setAssocCount] = useState(0)
   const [voterCount, setVoterCount] = useState(0)
   const [careers, setCareers] = useState<ApiCareer[]>([])
+  const [cachedAssocs, setCachedAssocs] = useState<ApiAssociation[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [simulateCareer, setSimulateCareer] = useState("")
   const [loading, setLoading] = useState(true)
   const [activating, setActivating] = useState<"schedule" | "open" | null>(null)
@@ -61,8 +64,9 @@ export function Step5({ election, electionId, token, hideHeader = false, onBack,
         setAssocCount(assocs.length)
         setVoterCount(voters.length)
         setCareers(c)
+        setCachedAssocs(assocs)
       })
-      .catch(() => {})
+      .catch((e) => setLoadError(e instanceof Error ? e.message : "Error al cargar los datos de revisión"))
       .finally(() => setLoading(false))
   }, [token, electionId])
 
@@ -84,7 +88,9 @@ export function Step5({ election, electionId, token, hideHeader = false, onBack,
     if (!simulateCareer) return
     setSimLoading(true)
     try {
-      const allAssocs = await listAssociations(token, { election_id: electionId })
+      const allAssocs = cachedAssocs.length > 0
+        ? cachedAssocs
+        : await listAssociations(token, { election_id: electionId })
       const career = careers.find((c) => c.career_id === simulateCareer)
       const careerName = career?.name ?? "—"
       const mapped = allAssocs
@@ -152,6 +158,7 @@ export function Step5({ election, electionId, token, hideHeader = false, onBack,
       {!hideHeader && (
         <SectionHeader title="Revisión" subtitle="Paso 5 de 5 - Revisión final antes de activar." />
       )}
+      {loadError && <ErrorBanner message={loadError} />}
       {activateError && <ErrorBanner message={activateError} />}
       <p className="mb-6 text-sm text-gray-600">
         Antes de iniciar la votación debes completar las siguientes tareas.

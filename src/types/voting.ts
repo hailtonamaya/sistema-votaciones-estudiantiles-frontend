@@ -34,4 +34,5 @@ export interface VoteResult {
   careerName: string
   associationName: string
   votingTimeSeconds: number
+  ballotHash?: string
 }

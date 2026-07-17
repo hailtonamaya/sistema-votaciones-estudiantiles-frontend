@@ -27,19 +27,18 @@ export default function StudentSuccessPage() {
       return
     }
     const id = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(id)
-          reset()
-          logout()
-          navigate("/login")
-          return 0
-        }
-        return c - 1
-      })
+      setCountdown((c) => (c <= 1 ? 0 : c - 1))
     }, 1000)
     return () => clearInterval(id)
-  }, [voteResult, navigate, reset, logout])
+  }, [voteResult, navigate])
+
+  useEffect(() => {
+    if (countdown === 0) {
+      reset()
+      logout()
+      navigate("/login")
+    }
+  }, [countdown, reset, logout, navigate])
 
   if (!voteResult) return null
 
