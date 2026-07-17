@@ -1,4 +1,5 @@
-import { DashboardLayout } from "@/components/DashboardLayout"
+import { Link } from "react-router-dom"
+import { ObserverLayout } from "@/components/ObserverLayout"
 import { useAuth } from "@/context/AuthContext"
 
 interface InfoCardProps {
@@ -7,11 +8,15 @@ interface InfoCardProps {
   icon: React.ReactNode
   badge?: string
   badgeColor?: string
+  href: string
 }
 
-function InfoCard({ title, description, icon, badge, badgeColor }: InfoCardProps) {
+function InfoCard({ title, description, icon, badge, badgeColor, href }: InfoCardProps) {
   return (
-    <div className="group cursor-pointer rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-md hover:-translate-y-0.5">
+    <Link
+      to={href}
+      className="group block cursor-pointer rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-md hover:-translate-y-0.5"
+    >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
           {icon}
@@ -26,7 +31,7 @@ function InfoCard({ title, description, icon, badge, badgeColor }: InfoCardProps
         {title}
       </h3>
       <p className="mt-1 text-sm text-gray-500">{description}</p>
-    </div>
+    </Link>
   )
 }
 
@@ -38,7 +43,7 @@ export default function ObserverDashboard() {
     hour < 12 ? "Buenos días" : hour < 18 ? "Buenas tardes" : "Buenas noches"
 
   return (
-    <DashboardLayout>
+    <ObserverLayout>
       <div className="mb-8 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white shadow-sm sm:p-8">
         <div className="flex items-center justify-between">
           <div>
@@ -116,6 +121,7 @@ export default function ObserverDashboard() {
       </h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <InfoCard
+          href="/observer/resultados"
           title="Participación electoral"
           description="Consulta en tiempo real cuántos estudiantes han ejercido su voto por carrera y elección."
           badge="En tiempo real"
@@ -130,6 +136,7 @@ export default function ObserverDashboard() {
           }
         />
         <InfoCard
+          href="/observer/resultados"
           title="Resultados"
           description="Visualiza los votos acumulados por asociación. Los datos se actualizan conforme avanza la votación."
           badge="Solo lectura"
@@ -143,6 +150,7 @@ export default function ObserverDashboard() {
           }
         />
         <InfoCard
+          href="/observer/elecciones"
           title="Elecciones activas"
           description="Información sobre los procesos electorales en curso: nombre, carrera, horario y estado actual."
           badge="Consulta"
@@ -157,6 +165,22 @@ export default function ObserverDashboard() {
           }
         />
         <InfoCard
+          href="/observer/asociaciones"
+          title="Asociaciones y candidatos"
+          description="Revisa las planillas registradas y sus integrantes para cada elección."
+          badge="Consulta"
+          badgeColor="bg-blue-100 text-blue-700"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+          }
+        />
+        <InfoCard
+          href="/observer/votantes"
           title="Padrón electoral"
           description="Revisa el listado de estudiantes habilitados para votar y su estado de participación."
           badge="Consulta"
@@ -178,6 +202,6 @@ export default function ObserverDashboard() {
           <span className="font-medium text-emerald-700">Sesión como Observador</span>
         </p>
       </div>
-    </DashboardLayout>
+    </ObserverLayout>
   )
 }

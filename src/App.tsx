@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import { Loader2 } from "lucide-react"
 import { AuthProvider } from "@/context/AuthContext"
 import { VotingProvider } from "@/context/VotingContext"
+import { ToastProvider } from "@/context/ToastContext"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { ChatWidget } from "@/components/ChatWidget"
 import { ChunkErrorBoundary } from "@/components/ChunkErrorBoundary"
@@ -29,7 +30,14 @@ const AdminPerfil             = lazy(() => import("@/pages/admin/AdminPerfil"))
 const AdminArchivados         = lazy(() => import("@/pages/admin/AdminArchivados"))
 const AdminAyuda              = lazy(() => import("@/pages/admin/AdminAyuda"))
 
-const ObserverDashboard           = lazy(() => import("@/pages/observer/ObserverDashboard"))
+const ObserverDashboard      = lazy(() => import("@/pages/observer/ObserverDashboard"))
+const ObserverElecciones     = lazy(() => import("@/pages/observer/ObserverElecciones"))
+const ObserverResultados     = lazy(() => import("@/pages/observer/ObserverResultados"))
+const ObserverVotantes       = lazy(() => import("@/pages/observer/ObserverVotantes"))
+const ObserverAsociaciones   = lazy(() => import("@/pages/observer/ObserverAsociaciones"))
+
+const AuditorDashboard       = lazy(() => import("@/pages/auditor/AuditorDashboard"))
+const AuditorLog             = lazy(() => import("@/pages/auditor/AuditorLog"))
 
 const StudentVotingPage           = lazy(() => import("@/pages/student/StudentVotingPage"))
 const StudentAssociationDetailPage = lazy(() => import("@/pages/student/StudentAssociationDetailPage"))
@@ -47,6 +55,7 @@ function PageLoader() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ToastProvider>
       <AuthProvider>
         <VotingProvider>
           <ChunkErrorBoundary>
@@ -202,6 +211,55 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/observer/elecciones"
+                element={
+                  <ProtectedRoute roles={["observer"]}>
+                    <ObserverElecciones />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/observer/resultados"
+                element={
+                  <ProtectedRoute roles={["observer"]}>
+                    <ObserverResultados />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/observer/votantes"
+                element={
+                  <ProtectedRoute roles={["observer"]}>
+                    <ObserverVotantes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/observer/asociaciones"
+                element={
+                  <ProtectedRoute roles={["observer"]}>
+                    <ObserverAsociaciones />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/auditor/dashboard"
+                element={
+                  <ProtectedRoute roles={["auditor"]}>
+                    <AuditorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/auditor/log"
+                element={
+                  <ProtectedRoute roles={["auditor"]}>
+                    <AuditorLog />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route
                 path="/student/votar"
@@ -243,6 +301,7 @@ export default function App() {
           <ChatWidget />
         </VotingProvider>
       </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   )
 }
