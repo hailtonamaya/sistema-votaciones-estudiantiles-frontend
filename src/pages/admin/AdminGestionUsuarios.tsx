@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { AdminLayout } from "@/components/AdminLayout"
 import { useAuth } from "@/context/AuthContext"
+import { useToast } from "@/context/ToastContext"
 import {
   type ApiUser,
   listAdminUsers,
@@ -57,6 +58,7 @@ function fromApi(u: ApiUser): AdminUser {
 
 export default function AdminGestionUsuarios() {
   const { token } = useAuth()
+  const toast = useToast()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -129,6 +131,7 @@ export default function AdminGestionUsuarios() {
           role: form.rol,
         })
         setUsers((prev) => prev.map((u) => (u.id === editingId ? fromApi(updated) : u)))
+        toast.success(`Usuario "${updated.full_name}" actualizado correctamente`)
       } else {
         const created = await createAdminUser(token!, {
           full_name: form.nombre,
@@ -136,6 +139,7 @@ export default function AdminGestionUsuarios() {
           role: form.rol,
         })
         setUsers((prev) => [...prev, fromApi(created)])
+        toast.success(`Usuario "${created.full_name}" creado correctamente`)
       }
       closeModal()
     } catch (e) {
@@ -146,12 +150,14 @@ export default function AdminGestionUsuarios() {
   }
 
   async function handleDelete(id: string) {
+    const user = users.find((u) => u.id === id)
     try {
       await deleteAdminUser(token!, id)
       setUsers((prev) => prev.filter((u) => u.id !== id))
       setSelected((prev) => prev.filter((s) => s !== id))
+      toast.success(user ? `Usuario "${user.nombre}" eliminado` : "Usuario eliminado")
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Error al eliminar")
+      toast.error(e instanceof Error ? e.message : "Error al eliminar")
     }
   }
 
