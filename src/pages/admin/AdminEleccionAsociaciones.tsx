@@ -35,8 +35,8 @@ export default function AdminEleccionAsociaciones() {
   }, [token])
 
   useEffect(() => {
-    
-    if (!selectedId || !token) { setSelectedElection(null); return }
+    if (!selectedId || !token) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- bandera de carga antes de un fetch condicional, no encadena otros efectos
     setLoadingElection(true)
     getElection(token, selectedId)
       .then(setSelectedElection)

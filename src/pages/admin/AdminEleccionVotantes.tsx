@@ -20,10 +20,10 @@ export default function AdminEleccionVotantes() {
   const [elections, setElections] = useState<ApiElection[]>([])
   const [organizations, setOrganizations] = useState<ApiOrganization[]>([])
   const [selectedOrg, setSelectedOrg] = useState("")
-  const [selectedElection, setSelectedElection] = useState<ApiElection | null>(null)
   const [loadingElections, setLoadingElections] = useState(true)
 
   const selectedId = searchParams.get("election_id") ?? ""
+  const selectedElection = elections.find((e) => e.election_id === selectedId) ?? null
 
   useEffect(() => {
     Promise.all([listElections(token!), listOrganizations(token!)])
@@ -31,11 +31,6 @@ export default function AdminEleccionVotantes() {
       .catch(() => {})
       .finally(() => setLoadingElections(false))
   }, [token])
-
-  useEffect(() => {
-    
-    setSelectedElection(elections.find((e) => e.election_id === selectedId) ?? null)
-  }, [selectedId, elections])
 
   function selectElection(id: string) {
     setSearchParams(id ? { election_id: id } : {}, { replace: true })
