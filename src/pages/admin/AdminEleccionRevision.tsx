@@ -10,6 +10,7 @@ import {
   listOrganizations,
 } from "@/services/admin.service"
 import { Lock, Loader2, ClipboardList } from "lucide-react"
+import { ErrorBanner } from "@/components/ErrorBanner"
 import { BRAND, ACCENT } from "@/lib/brand"
 import { Step5 } from "./wizard/Step5Revision"
 
@@ -24,6 +25,7 @@ export default function AdminEleccionRevision() {
   const [selectedElection, setSelectedElection] = useState<ApiElection | null>(null)
   const [loadingElections, setLoadingElections] = useState(true)
   const [loadingElection, setLoadingElection] = useState(false)
+  const [electionError, setElectionError] = useState<string | null>(null)
 
   const selectedId = searchParams.get("election_id") ?? ""
 
@@ -36,11 +38,12 @@ export default function AdminEleccionRevision() {
 
   useEffect(() => {
     
-    if (!selectedId || !token) { setSelectedElection(null); return }
+    if (!selectedId || !token) { setSelectedElection(null); setElectionError(null); return }
     setLoadingElection(true)
+    setElectionError(null)
     getElection(token, selectedId)
       .then(setSelectedElection)
-      .catch(() => {})
+      .catch((e) => setElectionError(e instanceof Error ? e.message : "No se pudo cargar la elección."))
       .finally(() => setLoadingElection(false))
   }, [selectedId, token])
 
@@ -114,6 +117,8 @@ export default function AdminEleccionRevision() {
         <div className="flex justify-center py-16">
           <Loader2 size={24} className="animate-spin text-gray-400" />
         </div>
+      ) : electionError ? (
+        <ErrorBanner message={electionError} />
       ) : (
         <>
           {/* Status banners */}

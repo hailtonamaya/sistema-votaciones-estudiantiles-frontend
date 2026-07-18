@@ -40,6 +40,8 @@ export default function OTPPage() {
         navigate("/admin/dashboard")
       } else if (user.role === "observer") {
         navigate("/observer/dashboard")
+      } else if (user.role === "auditor") {
+        navigate("/auditor/dashboard")
       } else if (user.role === "student") {
         navigate("/student/votar")
       } else {

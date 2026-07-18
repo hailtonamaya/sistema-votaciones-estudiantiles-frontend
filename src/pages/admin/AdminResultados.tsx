@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react"
+import { useCallback, useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react"
 import { AdminLayout } from "@/components/AdminLayout"
 import { ForecastPanel } from "@/components/ForecastPanel"
 import { StatCard } from "@/components/StatCard"
@@ -145,7 +145,7 @@ function AssocBar({
           <span className={`font-bold ${compact ? "text-sm" : "text-base"}`} style={{ color }}>
             {assoc.votes}
           </span>
-          <span className="text-xs text-gray-400">{formatPercent(share)}</span>
+          <span className="text-xs text-gray-400">{share.toFixed(1)}%</span>
         </div>
       </div>
       <div className={`w-full rounded-full bg-gray-100 ${compact ? "h-2" : "h-2.5"}`}>
@@ -493,7 +493,11 @@ function CareerView({ dashboard, prediction }: CareerViewProps) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function AdminResultados() {
+interface ResultadosViewProps {
+  Layout: ComponentType<{ children: ReactNode }>
+}
+
+export function ResultadosView({ Layout }: ResultadosViewProps) {
   const { token } = useAuth()
 
   const [elections, setElections] = useState<ElectionSummary[]>([])
@@ -580,16 +584,16 @@ export default function AdminResultados() {
 
   if (loadingElections) {
     return (
-      <AdminLayout>
+      <Layout>
         <div className="flex h-64 items-center justify-center">
           <Loader2 size={28} className="animate-spin text-gray-400" />
         </div>
-      </AdminLayout>
+      </Layout>
     )
   }
 
   return (
-    <AdminLayout>
+    <Layout>
       {/* ── Page header ── */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -1082,6 +1086,10 @@ export default function AdminResultados() {
           )}
         </>
       )}
-    </AdminLayout>
+    </Layout>
   )
+}
+
+export default function AdminResultados() {
+  return <ResultadosView Layout={AdminLayout} />
 }

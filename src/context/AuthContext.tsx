@@ -25,10 +25,27 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 const STORAGE_KEY = "auth_session"
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const payloadB64 = token.split(".")[1]
+    const payload = JSON.parse(atob(payloadB64))
+    return typeof payload.exp === "number" && payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
+
 function loadSession(): AuthState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const parsed = JSON.parse(raw) as AuthState
+      if (parsed.token && isTokenExpired(parsed.token)) {
+        localStorage.removeItem(STORAGE_KEY)
+        return { token: null, user: null, pendingEmail: null }
+      }
+      return parsed
+    }
   } catch {
     // ignore parse errors
   }
@@ -44,7 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (token: string, user: AuthUser) => {
     const next: AuthState = { token, user, pendingEmail: null }
     setState(next)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    } catch {
+      // session won't persist across page refreshes if storage is full
+    }
   }
 
   const logout = () => {

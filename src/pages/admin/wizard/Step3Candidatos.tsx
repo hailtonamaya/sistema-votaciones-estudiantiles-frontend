@@ -1,18 +1,23 @@
-import { useEffect, useState } from "react"
-import { ChevronRight, Loader2, Save, Trash2, UserPlus, Users, X } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { ChevronRight, ImageIcon, Loader2, Pencil, Save, Trash2, UserPlus, Users, X } from "lucide-react"
 import { ErrorBanner } from "@/components/ErrorBanner"
 import { EmptyState } from "@/components/EmptyState"
 import { SectionHeader } from "@/components/wizard/SectionHeader"
 import { BtnPrimary, BtnSecondary, BtnAccent } from "@/components/wizard/WizardButtons"
 import { WizardBottomBar } from "@/components/wizard/WizardBottomBar"
 import { BRAND, ACCENT } from "@/lib/brand"
+import { resolveImageUrl } from "@/lib/api"
 import {
   type ApiAssociation,
   type ApiAssociationMember,
   createAssociationMember,
+  updateAssociationMember,
   deleteAssociationMember,
   listAssociations,
+  uploadImage,
 } from "@/services/admin.service"
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 interface Step3Props {
   electionId: string
@@ -35,10 +40,13 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
   const [associations, setAssociations] = useState<ApiAssociation[]>([])
   const [loading, setLoading] = useState(true)
   const [activeAssoc, setActiveAssoc] = useState<string | null>(null)
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
   const [memberForm, setMemberForm] = useState({ full_name: "", role: "", photo_url: "" })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [removeError, setRemoveError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     listAssociations(token, { election_id: electionId })
@@ -66,27 +74,62 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
     return [...map.values()]
   })()
 
-  async function handleAddMember(assocId: string) {
+  function openEditMember(assocId: string, member: ApiAssociationMember) {
+    setActiveAssoc(assocId)
+    setEditingMemberId(member.association_member_id)
+    setMemberForm({
+      full_name: member.full_name,
+      role: member.role ?? "",
+      photo_url: member.photo_url ?? "",
+    })
+    setError(null)
+  }
+
+  async function handleSaveMember(assocId: string) {
     setError(null)
     if (!memberForm.full_name.trim()) { setError("El nombre del candidato es requerido"); return }
     setSaving(true)
     try {
-      const member = await createAssociationMember(token, assocId, {
-        full_name: memberForm.full_name.trim(),
-        role: memberForm.role.trim() || undefined,
-        photo_url: memberForm.photo_url.trim() || undefined,
-      })
-      setAssociations((prev) =>
-        prev.map((a) =>
-          a.association_id === assocId
-            ? { ...a, association_member: [...(a.association_member ?? []), member] }
-            : a,
-        ),
-      )
+      if (editingMemberId) {
+        const full_name = memberForm.full_name.trim()
+        const role = memberForm.role.trim() || null
+        const photo_url = memberForm.photo_url || null
+        await updateAssociationMember(token, assocId, editingMemberId, {
+          full_name,
+          role: role ?? undefined,
+          photo_url: photo_url ?? undefined,
+        })
+        setAssociations((prev) =>
+          prev.map((a) =>
+            a.association_id === assocId
+              ? {
+                  ...a,
+                  association_member: (a.association_member ?? []).map((m) =>
+                    m.association_member_id === editingMemberId ? { ...m, full_name, role, photo_url } : m,
+                  ),
+                }
+              : a,
+          ),
+        )
+      } else {
+        const member = await createAssociationMember(token, assocId, {
+          full_name: memberForm.full_name.trim(),
+          role: memberForm.role.trim() || undefined,
+          photo_url: memberForm.photo_url.trim() || undefined,
+        })
+        setAssociations((prev) =>
+          prev.map((a) =>
+            a.association_id === assocId
+              ? { ...a, association_member: [...(a.association_member ?? []), member] }
+              : a,
+          ),
+        )
+      }
       setMemberForm({ full_name: "", role: "", photo_url: "" })
       setActiveAssoc(null)
+      setEditingMemberId(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al agregar candidato")
+      setError(e instanceof Error ? e.message : editingMemberId ? "Error al actualizar el candidato" : "Error al agregar candidato")
     } finally {
       setSaving(false)
     }
@@ -166,7 +209,7 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
                     <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-4">
                       {assoc.logo_url ? (
                         <img
-                          src={assoc.logo_url}
+                          src={resolveImageUrl(assoc.logo_url)}
                           alt={assoc.name}
                           className="h-10 w-10 rounded-lg border border-gray-100 object-cover"
                         />
@@ -187,6 +230,7 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
                         <button
                           onClick={() => {
                             setActiveAssoc(isActive ? null : assoc.association_id)
+                            setEditingMemberId(null)
                             setError(null)
                             setMemberForm({ full_name: "", role: "", photo_url: "" })
                           }}
@@ -221,27 +265,73 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
                             }
                             className={`${inputCls} w-full`}
                           />
-                          <input
-                            type="url"
-                            placeholder="URL de foto (opcional)"
-                            value={memberForm.photo_url}
-                            onChange={(e) =>
-                              setMemberForm((p) => ({ ...p, photo_url: e.target.value }))
-                            }
-                            className={`${inputCls} w-full`}
-                          />
+                          <div>
+                            {memberForm.photo_url ? (
+                              <div className="flex items-center gap-2">
+                                <img
+                                  src={resolveImageUrl(memberForm.photo_url)}
+                                  alt="preview"
+                                  className="h-9 w-9 rounded-full border border-gray-200 object-cover"
+                                />
+                                <button
+                                  onClick={() => setMemberForm((p) => ({ ...p, photo_url: "" }))}
+                                  className="text-xs text-red-500 hover:underline"
+                                >
+                                  Quitar
+                                </button>
+                              </div>
+                            ) : (
+                              <div
+                                onClick={() => { if (!uploading) fileRef.current?.click() }}
+                                className="flex h-9 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-gray-300 bg-white px-3 text-xs text-gray-500 transition hover:border-blue-400"
+                              >
+                                {uploading ? (
+                                  <Loader2 size={13} className="animate-spin text-blue-400" />
+                                ) : (
+                                  <ImageIcon size={13} className="text-gray-400" />
+                                )}
+                                {uploading ? "Subiendo…" : "Foto (opcional)"}
+                              </div>
+                            )}
+                            <input
+                              ref={fileRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0]
+                                e.target.value = ""
+                                if (!file) return
+                                if (file.size > MAX_UPLOAD_BYTES) {
+                                  setError("La imagen no puede superar 5MB")
+                                  return
+                                }
+                                setError(null)
+                                setUploading(true)
+                                try {
+                                  const url = await uploadImage(token, file)
+                                  setMemberForm((p) => ({ ...p, photo_url: url }))
+                                } catch (err) {
+                                  setError(err instanceof Error ? err.message : "Error al subir la imagen")
+                                } finally {
+                                  setUploading(false)
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
                         <div className="mt-3 flex justify-end gap-2">
-                          <BtnSecondary onClick={() => setActiveAssoc(null)}>
+                          <BtnSecondary onClick={() => { setActiveAssoc(null); setEditingMemberId(null) }}>
                             <X size={14} />
                             Cancelar
                           </BtnSecondary>
                           <BtnPrimary
                             loading={saving}
-                            onClick={() => handleAddMember(assoc.association_id)}
+                            disabled={uploading}
+                            onClick={() => handleSaveMember(assoc.association_id)}
                           >
                             <Save size={14} />
-                            Guardar
+                            {editingMemberId ? "Guardar Cambios" : "Guardar"}
                           </BtnPrimary>
                         </div>
                       </div>
@@ -261,7 +351,7 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
                           >
                             {m.photo_url ? (
                               <img
-                                src={m.photo_url}
+                                src={resolveImageUrl(m.photo_url)}
                                 alt={m.full_name}
                                 className="h-8 w-8 rounded-full border border-gray-100 object-cover"
                               />
@@ -279,13 +369,22 @@ export function Step3({ electionId, token, isReadOnly = false, hideHeader = fals
                               )}
                             </div>
                             {!isReadOnly && (
-                              <button
-                                onClick={() => handleRemoveMember(assoc.association_id, m)}
-                                aria-label={`Eliminar candidato ${m.full_name}`}
-                                className="text-red-400 transition hover:text-red-600"
-                              >
-                                <Trash2 size={15} />
-                              </button>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => openEditMember(assoc.association_id, m)}
+                                  aria-label={`Editar candidato ${m.full_name}`}
+                                  className="text-gray-400 transition hover:text-blue-600"
+                                >
+                                  <Pencil size={15} />
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveMember(assoc.association_id, m)}
+                                  aria-label={`Eliminar candidato ${m.full_name}`}
+                                  className="text-red-400 transition hover:text-red-600"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
                             )}
                           </div>
                         ))}
