@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: rodrigob99/sistema-votaciones-estudiantiles-fe-frontend
+  IMAGE_NAME: hailtonamay/sistema-votaciones-estudiantiles-fe-frontend
   # Ruta relativa: el frontend llama a su propio origen y nginx reenvia
   # /api y /uploads al backend. NUNCA una IP/host directo aqui — ver
   # nginx/default.conf.
