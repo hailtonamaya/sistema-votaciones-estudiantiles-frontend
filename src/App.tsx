@@ -14,7 +14,6 @@ import OTPPage from "@/pages/OTPPage"
 
 // Rutas lazy — se cargan solo cuando el usuario navega a ellas
 const AdminDashboard          = lazy(() => import("@/pages/admin/AdminDashboard"))
-const AdminPlaceholder        = lazy(() => import("@/pages/admin/AdminPlaceholder"))
 const AdminResultados         = lazy(() => import("@/pages/admin/AdminResultados"))
 const AdminEleccionesDetalles = lazy(() => import("@/pages/admin/AdminEleccionesDetalles"))
 const AdminEleccionWizard     = lazy(() => import("@/pages/admin/AdminEleccionWizard"))
@@ -185,15 +184,6 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/admin/configuracion/parametros"
-                element={
-                  <ProtectedRoute roles={["admin"]}>
-                    <AdminPlaceholder title="Parámetros Globales" />
-                  </ProtectedRoute>
-                }
-              />
-
               <Route
                 path="/admin/ayuda"
                 element={
