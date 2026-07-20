@@ -1,6 +1,6 @@
 import type { Association } from "@/types/voting"
-import { UnitecLogo } from "@/components/UnitecLogo"
 import { BRAND } from "@/lib/brand"
+import { X } from "lucide-react"
 
 interface AssociationCardProps {
   association: Association
@@ -61,7 +61,7 @@ export function BlankVoteCard({ onClick }: BlankVoteCardProps) {
       className="group w-full overflow-hidden rounded-2xl bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand/40"
     >
       <div className="flex h-48 w-full items-center justify-center bg-gray-50">
-        <UnitecLogo size="md" />
+        <X className="text-slate-400" size={64} strokeWidth={1.5} aria-hidden="true" />
       </div>
       <div className="p-4">
         <p className="font-bold" style={{ color: BRAND }}>Registrar Voto Blanco</p>
