@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { VotingTimer } from "@/components/student/VotingTimer"
-import { UnitecLogo } from "@/components/UnitecLogo"
 import { useVoting } from "@/context/VotingContext"
 import { useAuth } from "@/context/AuthContext"
 import { castVote } from "@/services/voting.service"
 import { BRAND } from "@/lib/brand"
 import type { Association } from "@/types/voting"
+import { X } from "lucide-react"
 
 export default function StudentConfirmPage() {
   const [loading, setLoading] = useState(false)
@@ -104,7 +104,7 @@ export default function StudentConfirmPage() {
             />
           ) : isBlank ? (
             <div className="flex h-52 w-full items-center justify-center bg-gray-50 sm:h-80">
-              <UnitecLogo size="lg" />
+              <X className="text-slate-400" size={96} strokeWidth={1.5} aria-hidden="true" />
             </div>
           ) : (
             <div className="flex h-52 w-full items-center justify-center bg-slate-200 text-slate-400 sm:h-80">
