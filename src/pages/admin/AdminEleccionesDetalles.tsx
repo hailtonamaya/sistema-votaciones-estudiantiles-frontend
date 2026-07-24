@@ -38,18 +38,21 @@ const STATUS_CONFIG: Record<ElectionStatus, { label: string; bg: string; color: 
 }
 
 
-function formatDate(iso: string | null): string {
-  if (!iso) return "—"
-  return new Date(iso).toLocaleDateString("es-HN", { day: "numeric", month: "short", year: "numeric" })
-}
+const MONTH_NAMES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+]
 
-function formatTime(start: string | null, end: string | null): string {
-  if (!start && !end) return "—"
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleTimeString("es-HN", { hour: "numeric", minute: "2-digit", hour12: true })
-  if (start && end) return `${fmt(start)} - ${fmt(end)}`
-  if (start) return `Desde ${fmt(start)}`
-  return `Hasta ${fmt(end!)}`
+function formatDateTime(iso: string | null): string {
+  if (!iso) return "—"
+  const date = new Date(iso)
+  const day = date.getDate()
+  const month = MONTH_NAMES[date.getMonth()]
+  const year = date.getFullYear()
+  const minutes = date.getMinutes().toString().padStart(2, "0")
+  const period = date.getHours() >= 12 ? "PM" : "AM"
+  const hours12 = date.getHours() % 12 || 12
+  return `${day} de ${month} del ${year}, ${hours12}:${minutes} ${period}`
 }
 
 export default function AdminEleccionesDetalles() {
@@ -214,12 +217,12 @@ export default function AdminEleccionesDetalles() {
 
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Calendar size={15} className="flex-shrink-0 text-gray-400" />
-                    <span>{formatDate(election.start_at)}</span>
+                    <span>Inicio: {formatDateTime(election.start_at)}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Clock size={15} className="flex-shrink-0 text-gray-400" />
-                    <span>{formatTime(election.start_at, election.end_at)}</span>
+                    <span>Fin: {formatDateTime(election.end_at)}</span>
                   </div>
                 </div>
 
